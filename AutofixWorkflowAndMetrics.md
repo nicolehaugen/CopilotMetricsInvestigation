@@ -4,7 +4,7 @@
 
 ---
 
-## Autofix Workflow — Primary Path for Reducing Security Vulnerabilities with Copilot
+## Autofix Workflow: Primary Path for Reducing Security Vulnerabilities with Copilot
 
 **CodeQL → Copilot Autofix → Coding Agent → Resolved Vulnerability**
 
@@ -197,18 +197,6 @@ The [Pull Requests REST API](https://docs.github.com/en/rest/pulls) is relevant 
 
 ---
 
-### Copilot Metrics API Fields
-
-The Copilot Metrics API exposes the following fields relevant to Autofix and coding-agent activity:
-
-| Field | Description |
-|---|---|
-| `pull_requests.total_reviewed_by_copilot` | Number of pull requests reviewed by Copilot on a specific day. A PR may be counted on multiple days if Copilot reviews it on multiple days. |
-| `pull_requests.total_merged_created_by_copilot` | Number of pull requests created by Copilot that were merged on a specific day. Each PR is counted only on the day it is merged. |
-| `pull_requests.median_minutes_to_merge_copilot_authored` | Median time (in minutes) between pull request creation and merge for PRs created by Copilot, counted on the day of merge. |
-
----
-
 ## Detailed Workflow Data by Phase — Funnel Analysis
 
 This section frames the autofix workflow as a **conversion funnel**. At each phase, some alerts drop off — understanding where the biggest drop-offs occur reveals the bottleneck. For example:
@@ -247,8 +235,6 @@ The goal of this section is to understand at a high level how effective Autofix 
 | **Remediation rate (with vs. without autofix)** | Comparison of fix rates for autofix vs. non-autofix alerts | **Yes** — CodeQL PR Alerts page "Remediation rates" side-by-side bar chart | **No** — No API provides this comparison | — |
 | **Mean time to remediate (with vs. without autofix)** | Comparison of remediation speed for autofix vs. non-autofix alerts | **Yes** — CodeQL PR Alerts page "Mean time to remediate" side-by-side | **No** — No API provides this comparison | — |
 | **Prevented vs. Introduced** | Vulnerabilities caught in PRs before reaching the default branch | **Yes** — Prevention tab chart with date range selector | **No** — No API equivalent | — |
-| **Autofix PRs created** | PRs opened by the coding agent for autofix suggestions | **No** | **Yes** — Pull Requests API filtered by author `Copilot` | Requires listing PRs and filtering by author client-side |
-| **Autofix PRs merged** | Coding agent PRs that were merged | **No** | **Yes** — Pull Requests API filtered by author `Copilot` with `state: closed` and `merged: true` | No single aggregated metric; must query and count |
 | **Time from autofix suggestion to alert resolution** | Duration from autofix generation to alert fix | **No** | **No** — Would require correlating autofix `started_at` with alert `fixed_at` per alert | Not directly available in any source |
 | **Most prevalent rules** | Top CodeQL rules by frequency | **Yes** — CodeQL PR Alerts page "Most prevalent rules" list | **No** — No API provides rule-level aggregation | — |
 
@@ -256,5 +242,14 @@ The goal of this section is to understand at a high level how effective Autofix 
 
 - **The dashboard is the richest source today** — Most autofix metrics are available through the Security Overview dashboard, which supports date range filtering (including current day). The CodeQL PR Alerts page in particular provides the "Alerts in pull requests" breakdown, autofix suggestion counts, remediation rate comparisons, and mean time to remediate with/without autofix.
 - **API gaps are significant** — There is no consolidated "autofix metrics" API. Key metrics like autofix acceptance rates, remediation rate comparisons, and the PR alerts breakdown are only available in the dashboard.
-- **PR-level tracking requires API assembly** — Metrics about autofix PRs (created, merged) are only available via the Pull Requests API and require filtering and correlation across endpoints.
 - **CSV export bridges some gaps** — The dashboard CSV export includes `HasAutofix`, `AutofixAccepted`, `PullRequestURL`, and `ResolvedReason` per alert, but still requires querying the Pull Requests API for merge/review details.
+
+---
+
+## Open Decision Points
+
+The following questions need to be settled before finalizing the metrics strategy:
+
+1. **Is this the right workflow?** Is the workflow identified in this document (CodeQL → Copilot Autofix → Coding Agent → PR → Resolved Vulnerability) what most customers want to monitor and measure to understand reduction of security vulnerabilities using Copilot? Are there alternative or additional workflows we should account for?
+
+2. **Are these the right metrics?** Are the high-level enterprise metrics and detailed workflow phase metrics listed in this document what customers need to understand Autofix/Copilot effectiveness? Are there metrics missing that customers would expect, or metrics listed here that are not actually useful?
